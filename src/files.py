@@ -16,7 +16,7 @@ def load_client():
     else:
         client = TgtgClient(email=input('Your email: '))
         with open('tgtg_session.json', 'w') as f:
-            json.dump(client.get_credentials(), f)
+            json.dump(client.get_credentials(), f, indent=4)
     return client
 
 

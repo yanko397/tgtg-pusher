@@ -4,3 +4,4 @@ venv/
 config.json
 tgtg_session.json
 favorites.json
+notify_list.json
