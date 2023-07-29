@@ -1,13 +1,21 @@
 import os
 import json
-import pickle
+import requests
 from tgtg import TgtgClient
 
 
+def send_to_telegram(message):
+    api_url = f'https://api.telegram.org/bot{config["telegram_api_token"]}/sendMessage'
+    try:
+        requests.post(api_url, json={'chat_id': config["telegram_chat_id"], 'text': str(message)})
+    except Exception as e:
+        print(e)
+
+
 def load_client():
-    if os.path.exists('tgtg_session.pickle'):
-        with open('tgtg_session.pickle', 'rb') as f:
-            credentials = pickle.load(f)
+    if os.path.exists('tgtg_session.json'):
+        with open('tgtg_session.json') as f:
+            credentials = json.load(f)
         client = TgtgClient(
             access_token=credentials['access_token'],
             refresh_token=credentials['refresh_token'],
@@ -16,19 +24,24 @@ def load_client():
             )
     else:
         client = TgtgClient(email=input('Your email: '))
-        with open('tgtg_session.pickle', 'wb') as f:
-            pickle.dump(client.get_credentials(), f)
+        with open('tgtg_session.json', 'w') as f:
+            json.dump(client.get_credentials(), f)
     return client
 
 
 def main():
-    print('Loading client...')
     client = load_client()
-    print(client.get_credentials())
-    print('Getting favorites...')
     favorites = client.get_favorites()
-    print(json.dumps(favorites, indent=2))
+    favo_list = []
+    for favo in favorites:
+        favo_list.append({
+            'name': favo["store"]["store_name"],
+            'available': favo["items_available"]
+            })
+    send_to_telegram(favo_list)
 
 
 if __name__ == '__main__':
+    with open('config.json') as f:
+        config = json.load(f)
     main()
