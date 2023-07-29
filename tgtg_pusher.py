@@ -9,7 +9,7 @@ def telegram_send(message):
     api_url = f'https://api.telegram.org/bot{config["telegram_api_token"]}/sendMessage'
     try:
         response = requests.post(api_url, json={'chat_id': config["telegram_chat_id"], 'text': str(message)})
-        assert response.status_code == 200, response.text
+        assert response.status_code == 200, f'#####\n{response.text}\n{response.status_code}\n{message}\n#####'
         return response.json()['result']['message_id']
     except Exception as e:
         print(e)
@@ -19,7 +19,7 @@ def telegram_delete(message_id):
     api_url = f'https://api.telegram.org/bot{config["telegram_api_token"]}/deleteMessage'
     try:
         response = requests.post(api_url, json={'chat_id': config["telegram_chat_id"], 'message_id': message_id})
-        assert response.status_code == 200, response.text
+        assert response.status_code == 200, f'#####\n{response.text}\n{response.status_code}\n{message_id}\n#####'
     except Exception as e:
         print(e)
 
@@ -61,7 +61,7 @@ def main():
                 available[favo["display_name"]] = favo["items_available"]
 
         # remove from last_available if not available anymore and delete message
-        for x in last_available:
+        for x in last_available.copy():
             if x not in available:
                 telegram_delete(last_available.pop(x))
         # add to last_available if now available and send message
