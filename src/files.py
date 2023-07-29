@@ -2,6 +2,8 @@ import os
 import json
 from tgtg import TgtgClient
 
+os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 def load_client():
     if os.path.exists('tgtg_session.json'):
