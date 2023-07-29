@@ -64,6 +64,7 @@ def main():
     notify_list = load_notify_list()
     last_available = {}
     while True:
+        # filter available stores by items in notify_list and their availability
         available = {}
         for favo in client.get_favorites():
             if favo["display_name"] in notify_list and favo["items_available"]:
@@ -73,7 +74,8 @@ def main():
         for x in last_available.copy():
             if x not in available:
                 telegram_delete(last_available.pop(x)['id'])
-        # add to last_available if now available and send message
+
+        # add to last_available if now available and send/update message
         for x in available:
             message = f'{x}\n    {available[x]} verfügbar!'
             if x not in last_available:
