@@ -24,6 +24,15 @@ def telegram_delete(message_id):
         print(e)
 
 
+def telegram_edit(message_id, message):
+    api_url = f'https://api.telegram.org/bot{config["telegram_api_token"]}/editMessageText'
+    try:
+        response = requests.post(api_url, json={'chat_id': config["telegram_chat_id"], 'message_id': message_id, 'text': str(message)})
+        assert response.status_code == 200, f'#####\n{response.text}\n{response.status_code}\n{message_id}\n{message}\n#####'
+    except Exception as e:
+        print(e)
+
+
 def load_client():
     if os.path.exists('tgtg_session.json'):
         with open('tgtg_session.json') as f:
@@ -63,11 +72,15 @@ def main():
         # remove from last_available if not available anymore and delete message
         for x in last_available.copy():
             if x not in available:
-                telegram_delete(last_available.pop(x))
+                telegram_delete(last_available.pop(x)['id'])
         # add to last_available if now available and send message
         for x in available:
+            message = f'{x}\n    {available[x]} verfügbar!'
             if x not in last_available:
-                last_available[x] = telegram_send(f'{x}\n    {available[x]} verfügbar!')
+                last_available[x] = {'id': telegram_send(message), 'count': available[x]}
+            elif last_available[x]['count'] != available[x]:
+                telegram_edit(last_available[x]['id'], message)
+                last_available[x]['count'] = available[x]
 
         time.sleep(60)
 
