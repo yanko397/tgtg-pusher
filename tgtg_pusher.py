@@ -1,13 +1,25 @@
 import os
 import json
 import requests
+import time
 from tgtg import TgtgClient
 
 
-def send_to_telegram(message):
+def telegram_send(message):
     api_url = f'https://api.telegram.org/bot{config["telegram_api_token"]}/sendMessage'
     try:
-        requests.post(api_url, json={'chat_id': config["telegram_chat_id"], 'text': str(message)})
+        response = requests.post(api_url, json={'chat_id': config["telegram_chat_id"], 'text': str(message)})
+        assert response.status_code == 200, response.text
+        return response.json()['result']['message_id']
+    except Exception as e:
+        print(e)
+
+
+def telegram_delete(message_id):
+    api_url = f'https://api.telegram.org/bot{config["telegram_api_token"]}/deleteMessage'
+    try:
+        response = requests.post(api_url, json={'chat_id': config["telegram_chat_id"], 'message_id': message_id})
+        assert response.status_code == 200, response.text
     except Exception as e:
         print(e)
 
@@ -29,16 +41,35 @@ def load_client():
     return client
 
 
+def load_notify_list():
+    if os.path.exists('notify_list.json'):
+        with open('notify_list.json', encoding='utf-8') as f:
+            notify_list = json.load(f)
+    else:
+        notify_list = []
+    return notify_list
+
+
 def main():
     client = load_client()
-    favorites = client.get_favorites()
-    favo_list = []
-    for favo in favorites:
-        favo_list.append({
-            'name': favo["store"]["store_name"],
-            'available': favo["items_available"]
-            })
-    send_to_telegram(favo_list)
+    notify_list = load_notify_list()
+    last_available = {}
+    while True:
+        available = {}
+        for favo in client.get_favorites():
+            if favo["display_name"] in notify_list and favo["items_available"]:
+                available[favo["display_name"]] = favo["items_available"]
+
+        # remove from last_available if not available anymore and delete message
+        for x in last_available:
+            if x not in available:
+                telegram_delete(last_available.pop(x))
+        # add to last_available if now available and send message
+        for x in available:
+            if x not in last_available:
+                last_available[x] = telegram_send(f'{x}\n    {available[x]} verfügbar!')
+
+        time.sleep(60)
 
 
 if __name__ == '__main__':
