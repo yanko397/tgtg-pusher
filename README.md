@@ -4,6 +4,20 @@ A small project because it was annoying to never get the good stuff on TooGoodTo
 
 This script uses the python tgtg module to get your favorite stores, filter them by availability and send, update and delete info messages via a Telegram bot.
 
+# TLDR
+
+```
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp config.json.example config.json
+# fill config.json with your bot token and chat_id
+python print_names_of_your_favorites.py
+# enter email adress, click on link in email you get from tgtg
+# remove entries from generated notify_list.json file if you don't want updates
+python tgtg_pusher.py
+```
+
 # Installation and Usage
 
 - install requirements by running `pip install -r requirements.txt`
