@@ -2,6 +2,8 @@ import os
 import json
 from tgtg import TgtgClient
 
+from make_notify_list_json import save_notify_list
+
 os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
@@ -19,6 +21,8 @@ def load_client():
         client = TgtgClient(email=input('Your email: '))
         with open('tgtg_session.json', 'w') as f:
             json.dump(client.get_credentials(), f, indent=4)
+        if not os.path.exists('notify_list.json'):
+            save_notify_list()
     return client
 
 

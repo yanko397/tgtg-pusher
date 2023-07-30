@@ -19,7 +19,7 @@ class TgtgPusher:
             favorites = self.client.get_favorites()
         except TgtgAPIError as e:
             print(e)
-            return
+            return None
 
         notify_list = files.load_notify_list()
         available = {}
@@ -56,7 +56,7 @@ class TgtgPusher:
     def loop(self):
         while True:
             available = self.get_available_stores()
-            if not available:
+            if available is None:
                 self.telegram.send('potentially banned from tgtg, sleeping for 1 day')
                 time.sleep(60 * 60 * 24)
                 continue
