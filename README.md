@@ -14,6 +14,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 cp config.json.example config.json
 # fill config.json with your bot token and chat_id
+cd src
 python print_names_of_your_favorites.py
 # enter email adress, click on link in email you get from tgtg
 # remove entries from generated notify_list.json file if you don't want updates
