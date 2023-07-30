@@ -7,6 +7,8 @@ This script uses the python tgtg module to get your favorite stores, filter them
 # TLDR
 
 ```
+git clone https://github.com/yanko397/tgtg-pusher.git
+cd tgtg-pusher
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
