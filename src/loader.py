@@ -3,13 +3,18 @@ import json
 from tgtg import TgtgClient
 
 from make_notify_list_json import save_notify_list
+from telegram import Telegram
 
 os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+sessionfile = 'tgtg_session.json'
+notify_list_file = 'notify_list.json'
+telegram_config_file = 'config.json'
 
-def load_client():
-    if os.path.exists('tgtg_session.json'):
-        with open('tgtg_session.json') as f:
+
+def load_tgtg_client() -> TgtgClient:
+    if os.path.exists(sessionfile):
+        with open(sessionfile) as f:
             credentials = json.load(f)
         client = TgtgClient(
             access_token=credentials['access_token'],
@@ -19,26 +24,25 @@ def load_client():
         )
     else:
         client = TgtgClient(email=input('Your email: '))
-        with open('tgtg_session.json', 'w') as f:
+        with open(sessionfile, 'w') as f:
             json.dump(client.get_credentials(), f, indent=4)
-        if not os.path.exists('notify_list.json'):
+        if not os.path.exists(notify_list_file):
             save_notify_list()
     return client
 
 
-def load_notify_list():
-    if os.path.exists('notify_list.json'):
-        with open('notify_list.json', encoding='utf-8') as f:
+def load_notify_list() -> list:
+    if os.path.exists(notify_list_file):
+        with open(notify_list_file, encoding='utf-8') as f:
             notify_list = json.load(f)
     else:
         notify_list = []
     return notify_list
 
 
-def load_config():
-    if os.path.exists('config.json'):
-        with open('config.json', encoding='utf-8') as f:
-            config = json.load(f)
+def load_telegram() -> Telegram:
+    if os.path.exists(telegram_config_file):
+        with open(telegram_config_file, encoding='utf-8') as f:
+            return Telegram(json.load(f))
     else:
-        config = {}
-    return config
+        return None

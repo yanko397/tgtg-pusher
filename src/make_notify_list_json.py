@@ -1,10 +1,10 @@
 import json
 
-import files
+import loader
 
 
 def get_notify_list():
-    client = files.load_client()
+    client = loader.load_tgtg_client()
     return [favo["display_name"] for favo in client.get_favorites()]
 
 

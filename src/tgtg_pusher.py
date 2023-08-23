@@ -1,16 +1,16 @@
 import time
-from tgtg import TgtgAPIError
+from tgtg import TgtgClient, TgtgAPIError
 
 from telegram import Telegram
 import helpers
-import files
+import loader
 
 
 class TgtgPusher:
 
-    def __init__(self):
-        self.telegram = Telegram(files.load_config())
-        self.client = files.load_client()
+    def __init__(self, client: TgtgClient, telegram: Telegram):
+        self.telegram = telegram
+        self.client = client
         self.last_available = {}
 
     def get_available_stores(self):
@@ -21,7 +21,7 @@ class TgtgPusher:
             print(e)
             return None
 
-        notify_list = files.load_notify_list()
+        notify_list = loader.load_notify_list()
         available = {}
         for favo in favorites:
             if favo["display_name"] in notify_list and favo["items_available"]:
@@ -37,7 +37,7 @@ class TgtgPusher:
         for store_name in self.last_available.copy():
             if store_name not in available:
                 store = self.last_available.pop(store_name)
-                self.telegram.delete(store['message_id'])
+                store['message'].delete()
 
         # add to last_available if now available and send/update message
         for store_name, store in available.items():
@@ -46,19 +46,19 @@ class TgtgPusher:
                        f'    {store["count"]} verfügbar!')
             if store_name not in self.last_available:
                 self.last_available[store_name] = {
-                    'message_id': self.telegram.send(message),
+                    'message': self.telegram.send(message),
                     'count': store['count']
                 }
             elif self.last_available[store_name]['count'] != store['count']:
-                self.telegram.edit(self.last_available[store_name]['message_id'], message)
+                self.last_available[store_name]['message'].edit(message)
                 self.last_available[store_name]['count'] = store['count']
 
     def loop(self):
         while True:
             available = self.get_available_stores()
             if available is None:
-                self.telegram.send('potentially banned from tgtg, sleeping for 1 day')
-                time.sleep(60 * 60 * 24)
+                self.telegram.send("can't reach tgtg, trying again in 5 minutes")
+                time.sleep(60 * 5)
                 continue
             self.update_last_available(available)
             time.sleep(60)
@@ -72,6 +72,18 @@ class TgtgPusher:
 
 
 if __name__ == '__main__':
-    pusher = TgtgPusher()
-    pusher.start()
 
+    telegram = loader.load_telegram()
+    if telegram is None:
+        print('no telegram config found. exiting.')
+        exit()
+    client = loader.load_tgtg_client()
+
+    # message = telegram.send('test')
+    # time.sleep(2)
+    # message.edit('test2')
+    # time.sleep(2)
+    # message.delete()
+
+    pusher = TgtgPusher(client, telegram)
+    pusher.start()
