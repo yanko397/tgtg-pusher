@@ -3,15 +3,13 @@ import json
 import loader
 
 
-def get_notify_list():
+def save_new_notify_list():
     client = loader.load_tgtg_client()
-    return [favo["display_name"] for favo in client.get_favorites()]
-
-
-def save_notify_list():
+    notify_list = {favo["display_name"]: True for favo in client.get_favorites()}
     with open('notify_list.json', 'w', encoding='utf-8') as f:
-        json.dump(get_notify_list(), f, indent=4, ensure_ascii=False)
+        json.dump(notify_list, f, indent=4, ensure_ascii=False)
+    return notify_list
 
 
 if __name__ == '__main__':
-    save_notify_list()
+    save_new_notify_list()

@@ -24,7 +24,9 @@ class TgtgPusher:
         notify_list = loader.load_notify_list()
         available = {}
         for favo in favorites:
-            if favo["display_name"] in notify_list and favo["items_available"]:
+            if favo["display_name"] not in notify_list:
+                notify_list = loader.update_notify_list(favo["display_name"], True)
+            if notify_list[favo["display_name"]] and favo["items_available"]:
                 available[favo["display_name"]] = {
                     'count': favo["items_available"],
                     'time_start': helpers.parse_time(favo["pickup_interval"]["start"]),
