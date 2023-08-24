@@ -3,7 +3,7 @@ import json
 from tgtg import TgtgClient
 
 from make_notify_list_json import save_new_notify_list
-from telegram import Telegram
+from simple_telegram import SimpleTelegram
 
 os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -48,9 +48,14 @@ def update_notify_list(store_name: str, value: bool) -> dict:
     return notify_list
 
 
-def load_telegram() -> Telegram:
+def load_telegram_config() -> dict:
     if os.path.exists(telegram_config_file):
         with open(telegram_config_file, encoding='utf-8') as f:
-            return Telegram(json.load(f))
+            return json.load(f)
     else:
         return None
+
+
+def load_telegram() -> SimpleTelegram:
+    config = load_telegram_config()
+    return SimpleTelegram(config) if config else None

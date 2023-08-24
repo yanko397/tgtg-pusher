@@ -1,14 +1,14 @@
 import time
 from tgtg import TgtgClient, TgtgAPIError
 
-from telegram import Telegram
+from simple_telegram import SimpleTelegram
 import helpers
 import loader
 
 
 class TgtgPusher:
 
-    def __init__(self, client: TgtgClient, telegram: Telegram):
+    def __init__(self, client: TgtgClient, telegram: SimpleTelegram):
         self.telegram = telegram
         self.client = client
         self.last_available = {}

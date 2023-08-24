@@ -43,3 +43,4 @@ morgen 22:00 - 23:00
 
 - [ ] add english translations for the messages
 - [ ] write a better README
+- [ ] use python-telegram-bot instead of requests
