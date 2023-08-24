@@ -18,7 +18,7 @@ class TgtgPusher:
         try:
             favorites = self.client.get_favorites()
         except TgtgAPIError as e:
-            print(e)
+            print('get favos from tgtg failed with this:', e)
             return None
 
         notify_list = loader.load_notify_list()
@@ -55,37 +55,37 @@ class TgtgPusher:
                 self.last_available[store_name]['message'].edit(message)
                 self.last_available[store_name]['count'] = store['count']
 
-    def loop(self):
-        while True:
-            available = self.get_available_stores()
-            if available is None:
-                self.telegram.send("can't reach tgtg, trying again in 5 minutes")
-                time.sleep(60 * 5)
-                continue
-            self.update_last_available(available)
-            time.sleep(60)
 
     def start(self):
-        try:
-            self.loop()
-        except Exception as e:
-            self.telegram.send(f'something broke! exiting.\n#####\n{e}\n#####')
-            raise e
+        while True:
+            try:
+                available = self.get_available_stores()
+                if available is None:
+                    # TODO das hier is dumm, neu machen!
+                    message = self.telegram.send("can't reach tgtg, trying again in 5 minutes")
+                    for t in range(4, 0, -1):
+                        time.sleep(60)
+                        message.edit(f"can't reach tgtg, trying again in {t} minutes")
+                    time.sleep(60)
+                    message.delete()
+                    continue
+                self.update_last_available(available)
+                time.sleep(60)
+            except Exception as e:
+                print('######\nsomething went wrong. trying again in 5 minutes. error:', e.with_traceback(), '\n######')
+                self.telegram.send(f'something went wrong. trying again in 5 minutes.')
+                for t in range(4, 0, -1):
+                    time.sleep(60)
+                    message.edit(f'something went wrong. trying again in {t} minutes')
+                time.sleep(60)
+                message.delete()
 
 
 if __name__ == '__main__':
-
     telegram = loader.load_telegram()
     if telegram is None:
         print('no telegram config found. exiting.')
         exit()
     client = loader.load_tgtg_client()
-
-    # message = telegram.send('test')
-    # time.sleep(2)
-    # message.edit('test2')
-    # time.sleep(2)
-    # message.delete()
-
     pusher = TgtgPusher(client, telegram)
     pusher.start()

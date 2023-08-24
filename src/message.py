@@ -1,4 +1,6 @@
 import requests
+from datetime import datetime
+import time
 
 class Message:
 
@@ -14,14 +16,18 @@ class Message:
                 })
             assert response.status_code == 200, (
                 f'#####\n'
+                f'{datetime.now()}\n'
+                f'send failed\n'
                 f'{response.text}\n'
-                f'{response.status_code}\n'
                 f'{text}\n'
                 f'#####'
                 )
             self.message_id = response.json()['result']['message_id']
         except Exception as e:
             print(e)
+            timeout = response.json().get['parameters']['retry_after'] + 1
+            print('sleeping for', timeout, 'seconds')
+            time.sleep(timeout)
 
     def __eq__(self, __value: object) -> bool:
         return self.text == __value
@@ -40,14 +46,17 @@ class Message:
                 })
             assert response.status_code == 200, (
                 f'#####\n'
+                f'{datetime.now()}\n'
+                f'edit failed\n'
                 f'{response.text}\n'
-                f'{response.status_code}\n'
                 f'{text}\n'
-                f'{self.message_id}\n'
                 f'#####'
                 )
         except Exception as e:
             print(e)
+            timeout = response.json().get['parameters']['retry_after'] + 1
+            print('sleeping for', timeout, 'seconds')
+            time.sleep(timeout)
 
     def delete(self):
         api_url = f'https://api.telegram.org/bot{self.config["telegram_api_token"]}/deleteMessage'
@@ -58,10 +67,13 @@ class Message:
                 })
             assert response.status_code == 200, (
                 f'#####\n'
+                f'{datetime.now()}\n'
+                f'delete failed\n'
                 f'{response.text}\n'
-                f'{response.status_code}\n'
-                f'{self.message_id}\n'
                 f'#####'
                 )
         except Exception as e:
             print(e)
+            timeout = response.json().get['parameters']['retry_after'] + 1
+            print('sleeping for', timeout, 'seconds')
+            time.sleep(timeout)
