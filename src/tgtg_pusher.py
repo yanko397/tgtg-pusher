@@ -55,35 +55,32 @@ class TgtgPusher:
                 self.last_available[store_name]['message'].edit(message)
                 self.last_available[store_name]['count'] = store['count']
 
+    def timeout(self, message: str = 'waiting {0} minutes', minutes: int = 5):
+        self.telegram.send(message.format(minutes))
+        for t in range(4, 0, -1):
+            time.sleep(60)
+            message.edit(message.format(t))
+        time.sleep(60)
+        message.delete()
 
     def start(self):
         while True:
             try:
                 available = self.get_available_stores()
                 if available is None:
-                    # TODO das hier is dumm, neu machen!
-                    message = self.telegram.send("can't reach tgtg, trying again in 5 minutes")
-                    for t in range(4, 0, -1):
-                        time.sleep(60)
-                        message.edit(f"can't reach tgtg, trying again in {t} minutes")
-                    time.sleep(60)
-                    message.delete()
+                    self.timeout("can't reach tgtg or you don't have any favos..\ntrying again in {0} minutes")
                     continue
                 self.update_last_available(available)
                 time.sleep(60)
             except Exception as e:
-                print('######\nsomething went wrong. trying again in 5 minutes. error:', e.with_traceback(), '\n######')
-                self.telegram.send(f'something went wrong. trying again in 5 minutes.')
-                for t in range(4, 0, -1):
-                    time.sleep(60)
-                    message.edit(f'something went wrong. trying again in {t} minutes')
-                time.sleep(60)
-                message.delete()
+                print(f'######\nsomething broke. trying again in 5 minutes. error:\n{e.with_traceback()}\n######')
+                self.timeout('something went wrong..\ntrying again in {0} minutes.')
 
 
 if __name__ == '__main__':
     telegram = loader.load_telegram()
     if telegram is None:
+        # TODO here you could automatically switch to a command line mode
         print('no telegram config found. exiting.')
         exit()
     client = loader.load_tgtg_client()
