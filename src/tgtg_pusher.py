@@ -73,7 +73,7 @@ class TgtgPusher:
                 self.update_last_available(available)
                 time.sleep(60)
             except Exception as e:
-                print(f'######\nsomething broke. trying again in 5 minutes. error:\n{e.with_traceback()}\n######')
+                print(f'######\nsomething broke. trying again in 5 minutes. error:\n{e}\n######')
                 self.timeout('something went wrong..\ntrying again in {0} minutes.')
 
 
