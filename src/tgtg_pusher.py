@@ -56,12 +56,12 @@ class TgtgPusher:
                 self.last_available[store_name]['count'] = store['count']
 
     def timeout(self, message: str = 'waiting {0} minutes', minutes: int = 5):
-        self.telegram.send(message.format(minutes))
+        telegram_message = self.telegram.send(message.format(minutes))
         for t in range(4, 0, -1):
             time.sleep(60)
-            message.edit(message.format(t))
+            telegram_message.edit(message.format(t))
         time.sleep(60)
-        message.delete()
+        telegram_message.delete()
 
     def start(self):
         while True:
