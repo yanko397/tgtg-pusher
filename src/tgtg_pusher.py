@@ -57,7 +57,7 @@ class TgtgPusher:
 
     def timeout(self, message: str = 'waiting {0} minutes', minutes: int = 5):
         telegram_message = self.telegram.send(message.format(minutes))
-        for t in range(4, 0, -1):
+        for t in range(minutes-1, 0, -1):
             time.sleep(60)
             telegram_message.edit(message.format(t))
         time.sleep(60)
